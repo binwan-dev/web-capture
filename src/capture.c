@@ -107,7 +107,7 @@ uint8_t *getFrameBuffer(AVFrame *pFrame, AVCodecContext *pCodecCtx)
     return buffer;
 }
 
-// 截取指定位置视频画面
+// 截取指定位置视频画面 当ms小于0，只获取视频信息，不获取截图
 ImageData *capture(int ms, char *path)
 {
     ImageData *imageData = NULL;
@@ -117,13 +117,13 @@ ImageData *capture(int ms, char *path)
     if (avformat_open_input(&pFormatCtx, path, NULL, NULL) < 0)
     {
         fprintf(stderr, "avformat_open_input failed\n");
-        return NULL;
+        return imageData;
     }
 
     if (avformat_find_stream_info(pFormatCtx, NULL) < 0)
     {
         fprintf(stderr, "avformat_find_stream_info failed\n");
-        return NULL;
+        return imageData;
     }
 
     int videoStream = -1;
@@ -138,10 +138,23 @@ ImageData *capture(int ms, char *path)
 
     if (videoStream == -1)
     {
-        return NULL;
+        return imageData;
     }
 
     AVCodecContext *pCodecCtx = pFormatCtx->streams[videoStream]->codec;
+
+    imageData = (ImageData *)malloc(sizeof(ImageData));
+    imageData->width = (uint32_t)pCodecCtx->width;
+    imageData->height = (uint32_t)pCodecCtx->height;
+    imageData->duration = (uint32_t)pFormatCtx->duration;
+    imageData->fps = (uint32_t)getVideoFPS(pFormatCtx->streams[videoStream]);
+
+    if (ms < 0) // only return video info
+    {
+        avcodec_close(pCodecCtx);
+        avformat_close_input(&pFormatCtx);
+        return imageData;
+    }
 
     AVCodec *pCodec = NULL;
 
@@ -149,26 +162,26 @@ ImageData *capture(int ms, char *path)
     if (pCodec == NULL)
     {
         fprintf(stderr, "avcodec_find_decoder failed\n");
-        return NULL;
+        return imageData;
     }
 
     AVCodecContext *pNewCodecCtx = avcodec_alloc_context3(pCodec);
     if (avcodec_copy_context(pNewCodecCtx, pCodecCtx) != 0)
     {
         fprintf(stderr, "avcodec_copy_context failed\n");
-        return NULL;
+        return imageData;
     }
 
     if (avcodec_open2(pNewCodecCtx, pCodec, NULL) < 0)
     {
         fprintf(stderr, "avcodec_open2 failed\n");
-        return NULL;
+        return imageData;
     }
 
     if (!pNewCodecCtx)
     {
         fprintf(stderr, "pNewCodecCtx is NULL\n");
-        return NULL;
+        return imageData;
     }
 
     uint8_t *frameBuffer;
@@ -178,14 +191,9 @@ ImageData *capture(int ms, char *path)
     if (pFrameRGB == NULL)
     {
         fprintf(stderr, "readAVFrame failed\n");
-        return NULL;
+        return imageData;
     }
 
-    imageData = (ImageData *)malloc(sizeof(ImageData));
-    imageData->width = (uint32_t)pNewCodecCtx->width;
-    imageData->height = (uint32_t)pNewCodecCtx->height;
-    imageData->duration = (uint32_t)pFormatCtx->duration;
-    imageData->fps = (uint32_t)getVideoFPS(pFormatCtx->streams[videoStream]);
     imageData->data = getFrameBuffer(pFrameRGB, pNewCodecCtx);
 
     avcodec_close(pNewCodecCtx);

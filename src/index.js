@@ -32,22 +32,23 @@ const webCapture = {
 
 captureWorker.onmessage = function (evt) {
     if (evt.data.type == 'capture') {
-        try {
-            const { imageDataBuffer, width, height } = evt.data.data;
+        const { imageDataBuffer, width, height } = evt.data.data;
 
-            let canvas = document.createElement('canvas');
-            let ctx = canvas.getContext('2d');
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const imageData = new ImageData(imageDataBuffer, width, height);
-            ctx.putImageData(imageData, 0, 0, 0, 0, width, height);
-
-            webCapture.callback(canvas.toDataURL('image/jpeg'), evt.data.data);
-        } catch (error) {
-            webCapture.error(error);
+        if (imageDataBuffer.byteLength == 0) {
+            webCapture.callback(undefined, evt.data.data);
+            return;
         }
+
+        let canvas = document.createElement('canvas');
+        let ctx = canvas.getContext('2d');
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const imageData = new ImageData(imageDataBuffer, width, height);
+        ctx.putImageData(imageData, 0, 0, 0, 0, width, height);
+
+        webCapture.callback(canvas.toDataURL('image/jpeg'), evt.data.data);
     }
 };
 
