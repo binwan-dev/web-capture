@@ -9,7 +9,8 @@ class WebCapture {
         let width = Module.HEAPU32[imgDataPtr / 4],
             height = Module.HEAPU32[imgDataPtr / 4 + 1],
             duration = Module.HEAPU32[imgDataPtr / 4 + 2],
-            imageBufferPtr = Module.HEAPU32[imgDataPtr / 4 + 3],
+            fps = Module.HEAPU32[imgDataPtr / 4 + 3],
+            imageBufferPtr = Module.HEAPU32[imgDataPtr / 4 + 4],
             imageBuffer = Module.HEAPU8.slice(imageBufferPtr, imageBufferPtr + width * height * 3);
 
         Module._free(imgDataPtr);
@@ -32,6 +33,7 @@ class WebCapture {
             width,
             height,
             duration,
+            fps,
             imageDataBuffer
         };
     }

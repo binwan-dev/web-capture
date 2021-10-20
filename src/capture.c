@@ -8,6 +8,7 @@ typedef struct
     uint32_t width;
     uint32_t height;
     uint32_t duration;
+    uint32_t fps;
     uint8_t *data;
 } ImageData;
 
@@ -85,6 +86,11 @@ AVFrame *readAVFrame(AVCodecContext *pCodecCtx, AVFormatContext *pFormatCtx, AVF
     av_packet_unref(&packet);
 
     return NULL;
+}
+
+int getVideoFPS(AVStream *stream)
+{
+    return stream->avg_frame_rate.num / stream->avg_frame_rate.den;
 }
 
 // 读取帧数据并返回 uint8 buffer
@@ -179,6 +185,7 @@ ImageData *capture(int ms, char *path)
     imageData->width = (uint32_t)pNewCodecCtx->width;
     imageData->height = (uint32_t)pNewCodecCtx->height;
     imageData->duration = (uint32_t)pFormatCtx->duration;
+    imageData->fps = (uint32_t)getVideoFPS(pFormatCtx->streams[videoStream]);
     imageData->data = getFrameBuffer(pFrameRGB, pNewCodecCtx);
 
     avcodec_close(pNewCodecCtx);

@@ -37,11 +37,11 @@
 
             window.webCapture.capture(file, timeInput.value * 1000, (dataURL, imageInfo) => {
 
-                const { width, height, duration } = imageInfo;
+                const { width, height, duration, fps } = imageInfo;
 
                 resultContainer.innerHTML = `<img src="${dataURL}" />`
 
-                infoContainer.innerHTML = `耗时：${Date.now() - startTime}ms<br>宽度：${width}<br>高度：${height}<br>时长：${duration / 1000000}s`;
+                infoContainer.innerHTML = `耗时：${Date.now() - startTime}ms<br>宽度：${width}<br>高度：${height}<br>时长：${duration / 1000000}s<br>FPS: ${fps}`;
             }, (error) => {
                 console.log("interceptor: ", error);
             })
