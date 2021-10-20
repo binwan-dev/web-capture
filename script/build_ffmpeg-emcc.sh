@@ -6,10 +6,6 @@ NOW_PATH=$(cd $(dirname $0); pwd)
 
 WEB_CAPTURE_PATH=$(cd $NOW_PATH/../; pwd)
 
-FFMPEG_PATH=$(cd $WEB_CAPTURE_PATH/../ffmpeg-3.4.8; pwd)
-
-source $WEB_CAPTURE_PATH/../emsdk/emsdk_env.sh
-
 rm -rf  $WEB_CAPTURE_PATH/lib/ffmpeg-emcc
 
 mkdir $WEB_CAPTURE_PATH/lib/ffmpeg-emcc
@@ -23,6 +19,8 @@ emconfigure ./configure \
     --cc="emcc" \
     --cxx="em++" \
     --ar="emar" \
+    --ranlib="emranlib" \
+    --nm="emnm" \
     --cpu=generic \
     --target-os=none \
     --arch=x86_32 \
@@ -43,22 +41,11 @@ emconfigure ./configure \
     --disable-w32threads \
     --disable-os2threads \
     --disable-network \
-    --disable-everything \
-    --enable-protocol=file \
-    --enable-demuxer=mov \
-    --enable-demuxer=matroska \
-    --enable-demuxer=flv \
-    --enable-demuxer=avi \
-    --enable-decoder=h264 \
-    --enable-decoder=hevc \
-    --enable-decoder=mpeg4 \
-    --enable-decoder=vp8 \
-    --enable-decoder=vp9 \
-    --enable-decoder=wmv3 \
     --disable-asm \
     --disable-debug \
+    --disable-stripping
 
-make
+emmake make
 
 make install
 
