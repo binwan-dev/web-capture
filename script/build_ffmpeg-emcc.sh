@@ -1,5 +1,11 @@
 #!/bin/bash
 
+FFMPEG_PATH=$1
+if [ ! -n "$FFMPEG_PATH" ]; then
+    echo "please input ffmpeg dir!"
+    exit -1
+fi
+
 echo "===== start build ffmpeg-emcc ====="
 
 NOW_PATH=$(cd $(dirname $0); pwd)

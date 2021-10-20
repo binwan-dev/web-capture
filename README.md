@@ -2,34 +2,23 @@
 
 ## 依赖库&编译工具
 
-* ffmpeg-3.4.8
+* ffmpeg-3.4.9
 * emscripten-2.0.21
+* emsdk
 
-## 支持编码
+## 支持所有常见视频编码及格式
 
-* H.264
-* H.265
-* Mpeg2
-* Mpeg4
-* VP8
-* VP9
+## Linux系统编译
 
-## 支持格式
+### 1. 安装[emsdk](https://github.com/emscripten-core/emsdk)
 
-* Mkv
-* Mov
-* Avi
-* Mp4
-* Webm
-
-## 注意事项
-
-* 建议基于 `Ubuntu` 系统进行编译安装，已知 `Windows`、`Mac`都会出现各种文件丢失和环境不一致导致的问题
-
-* 编译前需要下载 [ffmpeg-3.4.8.tar.xz](http://ffmpeg.org/releases/ffmpeg-3.4.8.tar.xz) 并解压至与 `web-capture` 同级的目录
-
-* `emsdk` 安装目录需要与 `web-capture` 同级
-
+### 2. 编译ffmpeg
+下载 [ffmpeg-3.4.9.tar.xz](http://ffmpeg.org/releases/ffmpeg-3.4.9.tar.xz)
+``` shell
+chmod +x ./script/build_ffmpeg-emcc.sh
+./script/build_ffmpeg-emcc.sh "your ffmpeg dir path"
+```
+### 3. 运行 `npm run build` 编译项目
 
 ## demo运行
 
