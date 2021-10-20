@@ -1,7 +1,7 @@
-prefix=/data/web-capture/lib/ffmpeg-emcc
+prefix=/data/web-catch-picture/lib/ffmpeg-emcc
 exec_prefix=${prefix}
-libdir=/data/web-capture/lib/ffmpeg-emcc/lib
-includedir=/data/web-capture/lib/ffmpeg-emcc/include
+libdir=/data/web-catch-picture/lib/ffmpeg-emcc/lib
+includedir=/data/web-catch-picture/lib/ffmpeg-emcc/include
 
 Name: libavformat
 Description: FFmpeg container format library

@@ -3,22 +3,25 @@
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 
-typedef struct {
+typedef struct
+{
     uint32_t width;
     uint32_t height;
     uint32_t duration;
     uint8_t *data;
 } ImageData;
 
-
-int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[])
+{
     av_register_all();
     return 0;
 }
 
-AVFrame *initAVFrame(AVCodecContext *pCodecCtx, uint8_t **frameBuffer) {
+AVFrame *initAVFrame(AVCodecContext *pCodecCtx, uint8_t **frameBuffer)
+{
     AVFrame *pFrameRGB = av_frame_alloc();
-    if (pFrameRGB == NULL) {
+    if (pFrameRGB == NULL)
+    {
         return NULL;
     }
 
@@ -32,7 +35,8 @@ AVFrame *initAVFrame(AVCodecContext *pCodecCtx, uint8_t **frameBuffer) {
     return pFrameRGB;
 }
 
-AVFrame *readAVFrame(AVCodecContext *pCodecCtx, AVFormatContext *pFormatCtx, AVFrame *pFrameRGB, int videoStream, int ms) {
+AVFrame *readAVFrame(AVCodecContext *pCodecCtx, AVFormatContext *pFormatCtx, AVFrame *pFrameRGB, int videoStream, int ms)
+{
     struct SwsContext *sws_ctx = NULL;
 
     AVPacket packet;
@@ -46,20 +50,25 @@ AVFrame *readAVFrame(AVCodecContext *pCodecCtx, AVFormatContext *pFormatCtx, AVF
 
     int ret = av_seek_frame(pFormatCtx, videoStream, timeStamp, AVSEEK_FLAG_BACKWARD);
 
-    if (ret < 0) {
+    if (ret < 0)
+    {
         fprintf(stderr, "av_seek_frame failed\n");
         return NULL;
     }
 
-    while (av_read_frame(pFormatCtx, &packet) >= 0) {
-        if (packet.stream_index == videoStream) {
-            if (avcodec_send_packet(pCodecCtx, &packet) != 0) {
+    while (av_read_frame(pFormatCtx, &packet) >= 0)
+    {
+        if (packet.stream_index == videoStream)
+        {
+            if (avcodec_send_packet(pCodecCtx, &packet) != 0)
+            {
                 fprintf(stderr, "avcodec_send_packet failed\n");
                 av_packet_unref(&packet);
                 continue;
             }
 
-            if (avcodec_receive_frame(pCodecCtx, pFrame) == 0) {
+            if (avcodec_receive_frame(pCodecCtx, pFrame) == 0)
+            {
                 sws_scale(sws_ctx, (uint8_t const *const *)pFrame->data, pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data, pFrameRGB->linesize);
 
                 sws_freeContext(sws_ctx);
@@ -79,42 +88,50 @@ AVFrame *readAVFrame(AVCodecContext *pCodecCtx, AVFormatContext *pFormatCtx, AVF
 }
 
 // 读取帧数据并返回 uint8 buffer
-uint8_t *getFrameBuffer(AVFrame *pFrame, AVCodecContext *pCodecCtx) {
+uint8_t *getFrameBuffer(AVFrame *pFrame, AVCodecContext *pCodecCtx)
+{
     int width = pCodecCtx->width;
     int height = pCodecCtx->height;
 
     uint8_t *buffer = (uint8_t *)malloc(height * width * 3);
-    for (int y = 0; y < height; y++) {
+    for (int y = 0; y < height; y++)
+    {
         memcpy(buffer + y * pFrame->linesize[0], pFrame->data[0] + y * pFrame->linesize[0], width * 3);
     }
     return buffer;
 }
 
 // 截取指定位置视频画面
-ImageData *capture(int ms, char *path) {
+ImageData *capture(int ms, char *path)
+{
     ImageData *imageData = NULL;
 
-    AVFormatContext *pFormatCtx = avformat_alloc_context();  
+    AVFormatContext *pFormatCtx = avformat_alloc_context();
 
-    if (avformat_open_input(&pFormatCtx, path, NULL, NULL) < 0) {
+    if (avformat_open_input(&pFormatCtx, path, NULL, NULL) < 0)
+    {
         fprintf(stderr, "avformat_open_input failed\n");
         return NULL;
     }
 
-    if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
+    if (avformat_find_stream_info(pFormatCtx, NULL) < 0)
+    {
         fprintf(stderr, "avformat_find_stream_info failed\n");
         return NULL;
     }
 
     int videoStream = -1;
-    for (int i = 0; i < pFormatCtx->nb_streams; i++) {
-        if (pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+    for (int i = 0; i < pFormatCtx->nb_streams; i++)
+    {
+        if (pFormatCtx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
+        {
             videoStream = i;
             break;
         }
     }
 
-    if (videoStream == -1) {
+    if (videoStream == -1)
+    {
         return NULL;
     }
 
@@ -123,23 +140,27 @@ ImageData *capture(int ms, char *path) {
     AVCodec *pCodec = NULL;
 
     pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
-    if (pCodec == NULL) {
+    if (pCodec == NULL)
+    {
         fprintf(stderr, "avcodec_find_decoder failed\n");
         return NULL;
     }
 
     AVCodecContext *pNewCodecCtx = avcodec_alloc_context3(pCodec);
-    if (avcodec_copy_context(pNewCodecCtx, pCodecCtx) != 0) {
+    if (avcodec_copy_context(pNewCodecCtx, pCodecCtx) != 0)
+    {
         fprintf(stderr, "avcodec_copy_context failed\n");
         return NULL;
     }
 
-    if (avcodec_open2(pNewCodecCtx, pCodec, NULL) < 0) {
+    if (avcodec_open2(pNewCodecCtx, pCodec, NULL) < 0)
+    {
         fprintf(stderr, "avcodec_open2 failed\n");
         return NULL;
     }
 
-    if (!pNewCodecCtx) {
+    if (!pNewCodecCtx)
+    {
         fprintf(stderr, "pNewCodecCtx is NULL\n");
         return NULL;
     }
@@ -148,7 +169,8 @@ ImageData *capture(int ms, char *path) {
     AVFrame *pFrameRGB = initAVFrame(pNewCodecCtx, &frameBuffer);
     pFrameRGB = readAVFrame(pNewCodecCtx, pFormatCtx, pFrameRGB, videoStream, ms);
 
-    if (pFrameRGB == NULL) {
+    if (pFrameRGB == NULL)
+    {
         fprintf(stderr, "readAVFrame failed\n");
         return NULL;
     }
@@ -162,7 +184,7 @@ ImageData *capture(int ms, char *path) {
     avcodec_close(pNewCodecCtx);
     av_free(pCodec);
     avcodec_close(pCodecCtx);
-    av_frame_free(&pFrameRGB);    
+    av_frame_free(&pFrameRGB);
     av_free(frameBuffer);
     avformat_close_input(&pFormatCtx);
 
