@@ -41,7 +41,7 @@
 
                 resultContainer.innerHTML = `<img src="${dataURL}" />`
 
-                infoContainer.innerHTML = `耗时：${Date.now() - startTime}ms<br>宽度：${width}<br>高度：${height}<br>时长：${duration / 1000000}s<br>FPS: ${fps}`;
+                infoContainer.innerHTML = `耗时：${Date.now() - startTime}ms<br>宽度：${width}<br>高度：${height}<br>时长：${duration} s<br>FPS: ${fps}`;
             }, (error) => {
                 console.log("interceptor: ", error);
             })

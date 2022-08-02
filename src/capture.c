@@ -142,11 +142,12 @@ ImageData *capture(int ms, char *path)
     }
 
     AVCodecContext *pCodecCtx = pFormatCtx->streams[videoStream]->codec;
-
+    AVStream *pstream=pFormatCtx->streams[videoStream];
+    
     imageData = (ImageData *)malloc(sizeof(ImageData));
     imageData->width = (uint32_t)pCodecCtx->width;
     imageData->height = (uint32_t)pCodecCtx->height;
-    imageData->duration = (uint32_t)pFormatCtx->duration;
+    imageData->duration = (uint32_t)(pstream->duration * av_q2d(pstream->time_base));
     imageData->fps = (uint32_t)getVideoFPS(pFormatCtx->streams[videoStream]);
 
     if (ms < 0) // only return video info
